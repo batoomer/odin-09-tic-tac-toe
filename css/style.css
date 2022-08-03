@@ -1,0 +1,14 @@
+* {
+    margin:0;
+    padding:0;
+    box-sizing: border-box;
+}
+
+:root {
+    --red-light: #FF5C5C;
+    --blue-light: #90C8EC;
+    --white-main: #ffffffde;
+    
+    --dark-bg: #121212;
+
+}
