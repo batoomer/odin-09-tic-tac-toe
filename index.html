@@ -58,9 +58,9 @@
                 <div>
                     <p>Select the Difficulty:</p>
                     <div>
-                        <button class="active-difficulty">Easy</button>
-                        <button>Normal</button>
-                        <button>Impossible</button>
+                        <button data-difficulty="easy" class="active-difficulty">Easy</button>
+                        <button data-difficulty="normal">Normal</button>
+                        <button data-difficulty="impossible"> Impossible</button>
                     </div>
                 </div>
 
@@ -88,9 +88,9 @@
             <div class="options">
                 <!-- Options Title -->
                 <div>
-                    <p>Player <img src="./assets/symbols/symbol-x.svg" alt="X"></p>
+                    <p><span>Player</span><img src="./assets/symbols/symbol-x.svg" alt="X"></p>
                     <img src="./assets/versus.svg" alt="VS" width="25px">
-                    <p>Player <img src="./assets/symbols/symbol-o.svg" alt="O"></p>
+                    <p><span>Player</span> <img src="./assets/symbols/symbol-o.svg" alt="O"></p>
                 </div>
                
                 <!-- Options Inputs-->
@@ -123,8 +123,8 @@
             <div class="scoreboard">
                 <p>Round: <span>0</span></p>
                 <div>
-                    <p class="active-player"><img src="./assets/symbols/symbol-x.svg" alt="X"> Player: <span>0</span></p>
-                    <p><img src="./assets/symbols/symbol-o.svg" alt="X"> Player: <span>0</span></p>
+                    <p class="active-player"><img src="./assets/symbols/symbol-x.svg" alt="X"> <span>Player</span>: <span>0</span></p>
+                    <p><img src="./assets/symbols/symbol-o.svg" alt="X"> <span>Player</span>: <span>0</span></p>
                 </div>
             </div>
             <!-- Tic Tac Toe Gameboard -->
