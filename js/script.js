@@ -76,6 +76,15 @@ const Gameboard = (()=> {
     };
 
     /**
+     * Removes the move from the given field
+     * @param {int} index position of the field
+     */
+    const deleteMove = (index) => {
+        if (!isIndexValid(index)) throw new RangeError('Index out of range [0,9)');
+        gameboard[index] = '';
+    };
+
+    /**
      * Returns the lenght of the gameboard.
      * @returns int, lenght of the gameboard
      */
@@ -102,7 +111,8 @@ const Gameboard = (()=> {
         addMove,
         isFull,
         length,
-        reset
+        reset,
+        deleteMove
     };
 
 })();
@@ -260,6 +270,7 @@ const GameController = (()=>{
 
     return {
         makeMove,
+        isWinningMove,
         getCurrentPlayer,
         getRound,
         reset
@@ -271,7 +282,20 @@ const GameController = (()=>{
 
 const ComputerLogic = (() => {
 
+    const getFreeFields = () => {
+        let freeFields = []
+        for (let i=0; i<Gameboard.length(); i++){
+            if (Gameboard.isFieldFree(i)){
+                freeFields.push(i);
+            }
+        };
+        return freeFields;
+    };
 
+    /**
+     * Return a random move for the computer. -EASY DIFFICULTY
+     * @returns computer move
+     */
     const getEasyMove = () => {
         let index = Math.floor(Math.random() * 9);
         while (!Gameboard.isFieldFree(index)){
@@ -280,12 +304,66 @@ const ComputerLogic = (() => {
         return index;
     };
 
+    /**
+     * A brute force approach. 
+     * (1) Start by making a move in the center, if available else, make a random move. 
+     * (2) Make a second random move.
+     * (3) After making two moves:
+     *     (a) Try to make a winning move else make a random move
+     *     (b) Repeat (a) until game finishes
+     * @returns computer move
+     */
+    const getNormalMove = () => {
+        let index = NaN;
+        let freeFields = getFreeFields();
+
+        // If it is the first move make a move to the center else make a random move
+        if (freeFields.length >= 8){
+            index = Gameboard.isFieldFree(4) ? 4 : getEasyMove();
+            return index;
+        }
+        
+        // If it is the second move, make a random move
+        if (freeFields.length >=6) {
+            index = getEasyMove();
+            return index;
+        }
+
+        // Try to make a winning move else make a random move
+        console.log(freeFields)
+        while (freeFields.length){
+            let tempMove = freeFields.pop();
+
+            Gameboard.addMove(tempMove, 'o');
+
+            if (GameController.isWinningMove() === 'win'){
+                index = tempMove;
+                Gameboard.deleteMove(tempMove)
+                break;
+            };
+
+            Gameboard.deleteMove(tempMove)    
+        }
+
+        if (isNaN(index)) {
+            index=getEasyMove()
+        };
+        console.log('After NAN IF', index)
+        return index;
+    };
+
+    const getImpossibleMove = () => {
+
+    };
+
+
+
     const getComputerMove = (difficulty) => {
         switch (difficulty){
             case 'easy':
                 return getEasyMove();
             case 'normal':
-                break;
+                return getNormalMove();
             case 'impossible':
                 break;
         };

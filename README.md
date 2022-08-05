@@ -1,12 +1,14 @@
-# The Odin Project - 09 Library
+# The Odin Project - 09 Tic Tac Toe
 This is the 9th project of the odin project curriculum.
 
 ## <a href= "https://batoomer.github.io/odin-09-tic-tac-toe/">Preview Link</a><br>
 
 ## Technolgies Used
 - HTML
-- CSS
-- JS 
+- CSS: Advanced Selectors
+- JS: Module Pattern, Factory Pattern, DOM Manipulation 
+
+-Algorithm: Minmax in Game Theory
 
 ## The Odin Project: Projects
 - <a href= "https://github.com/batoomer/odin-09-tic-tac-toe/">Tic Tac Toe</a><br>
