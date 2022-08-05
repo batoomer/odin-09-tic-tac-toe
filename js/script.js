@@ -1,24 +1,254 @@
-
+/**
+ * Factory Pattern that returns a Player Object.
+ * @param {string} name 
+ * @returns Player Object
+ */
 const playerFactory = (name) =>{
     let score = 0;
+    /**
+     * Returns the player score
+     * @returns int player score
+     */
     const getScore = () => {return score};
     
+    /**
+     * Updates the score by adding the value provided
+     * @param {int} value score update value
+     */
     const updateScore = (value) => {
         score += value;
     } 
 
+    /**
+     * Resets the player score
+     */
     const resetScore = () => {score=0;}
 
     return {name, getScore, updateScore, resetScore};
 };
 
 
-
+/**
+ * Factory Pattern that returns an Option Object
+ * @param {Player} playerX Player Object for player X
+ * @param {Player} playerO Player Object for player O
+ * @param {String} gameType game type, pvp or pve
+ * @param {String} difficulty defaults to 'easy'.
+ * @returns Option Object
+ */
 const optionFactory = (playerX, playerO, gameType, difficulty="easy") => {
     return {playerX, playerO, gameType, difficulty};
 };
 
+/**
+ * Module Pattern that represents the gameboard
+ */
+const Gameboard = (()=> {
+    let gameboard = new Array(9).fill('');
+   
+    /**
+     * Checks if the index is in range. 0 - 8.
+     * @param {int} index position of the field
+     * @returns boolean 
+     */
+    const isIndexValid = (index) => {return (0 <= index && index < 9) ? true : false};
+    
+    /**
+     * Returns the value of the given field.
+     * @param {int} index position of the field
+     * @returns the field value
+     */
+    const getMove = (index) => {
+        if (!isIndexValid(index)) throw new RangeError('Index out of range [0,9)');
+        return gameboard[index];
+    }
 
+    /**
+     * Adds a move to the given gameboard field;
+     * @param {int} index position of the field
+     * @param {String} move move to add to the field
+     */
+    const addMove = (index, move) => {
+        if (!isIndexValid(index)) throw new RangeError('Index out of range [0,9)');
+        gameboard[index] = move;
+    };
+
+    /**
+     * Returns the lenght of the gameboard.
+     * @returns int, lenght of the gameboard
+     */
+    const length = () => {return gameboard.length};
+
+    /**
+     * Checks if the gameboard is full
+     * @returns boolean
+     */
+    const isFull = () => {return gameboard.includes('') ? false: true};
+
+    /**
+     * Resets the gameboard by creating a new gameboard
+     */
+    const reset = () => {gameboard = new Array(9).fill('')};
+
+    // For DEBUGGING
+    const printGameboard = () => {console.log(gameboard, length())};
+    
+    return {
+        printGameboard,
+        getMove,
+        addMove,
+        isFull,
+        length,
+        reset
+    };
+
+})();
+
+/**
+ * Module Pattern that Contains the game logic
+ */
+const GameController = (()=>{
+
+    let currentPlayer = 'x';
+    let round = 0;
+
+
+
+
+    /**
+     * Checks if the move has an winning/tying/none impact.
+     * @returns String 'win' for winning move, 'tie' for a tying move, '' for a move without a result
+     */
+    const isWinningMove = () => {
+        let winState = '';
+        
+        // Check Horizontal Lines
+        //  0 - 1 - 2
+        if ((Gameboard.getMove(0) !== '') && (Gameboard.getMove(0) === Gameboard.getMove(1)) && (Gameboard.getMove(0) === Gameboard.getMove(2))) {
+            winState = 'win';
+            return winState;
+        };
+        //  3 - 4 - 5
+        if ((Gameboard.getMove(3) !== '') && (Gameboard.getMove(3) === Gameboard.getMove(4)) && (Gameboard.getMove(3) === Gameboard.getMove(5))) {
+            winState = 'win';
+            return winState;
+        };
+        
+        //  6 - 7 - 8
+        if ((Gameboard.getMove(6) !== '') && (Gameboard.getMove(6) === Gameboard.getMove(7)) && (Gameboard.getMove(6) === Gameboard.getMove(8))) {
+            winState = 'win';
+            return winState;
+        };
+
+
+        // Check Vertical Lines
+        //  0 - 3 - 6
+        if ((Gameboard.getMove(0) !== '') && (Gameboard.getMove(0) === Gameboard.getMove(3)) && (Gameboard.getMove(0) === Gameboard.getMove(6))) {
+            winState = 'win';
+            return winState;
+        };
+        
+
+        //  1 - 4 - 7
+        if ((Gameboard.getMove(1) !== '') && (Gameboard.getMove(1) === Gameboard.getMove(4)) && (Gameboard.getMove(1) === Gameboard.getMove(7))) {
+            winState = 'win';
+            return winState;
+        };
+
+        //  2 - 5 - 8
+        if ((Gameboard.getMove(2) !== '') && (Gameboard.getMove(2) === Gameboard.getMove(5)) && (Gameboard.getMove(2) === Gameboard.getMove(8))) {
+            winState = 'win';
+            return winState;
+        };
+        
+
+        // Check Cross 
+        //0 - 4 - 8
+        if ((Gameboard.getMove(4) !== '') && (Gameboard.getMove(0) === Gameboard.getMove(4)) && (Gameboard.getMove(0) === Gameboard.getMove(8))) {
+            winState = 'win';
+            return winState;
+        };
+        // 2 - 4 - 6
+        if ((Gameboard.getMove(4) !== '') && (Gameboard.getMove(2) === Gameboard.getMove(4)) && (Gameboard.getMove(2) === Gameboard.getMove(6))) {
+            winState = 'win';
+            return winState;
+        };
+
+        // Check if Gameboard is FULL and There is no winner
+        if (Gameboard.isFull()){
+            winState = 'tie';
+            return winState;
+        };
+
+        return winState;
+    };
+
+    /**
+     * Return the current player
+     * @returns string current player
+     */
+    const getCurrentPlayer = () => {return currentPlayer};
+
+    /**
+     * Returns the round;
+     * @returns int round
+     */
+    const getRound = () => {return round};
+    
+    /**
+     * Swaps the current player with the new player
+     */
+    const swapPlayer = () => {
+        if (currentPlayer === 'x') {
+            currentPlayer = 'o';
+        } else {
+            currentPlayer = 'x';
+        };
+    };
+
+    /**
+     * Makes a move and checks if it has any impact on the game. If 
+     * the move is a finishing/ending move increments the round. Also swaps
+     * the player after the move was made.
+     * @param {int} position field position to make the move 
+     * @returns the impact on the game if any
+     */
+    const makeMove = (position) => {
+        
+        Gameboard.addMove(position, currentPlayer);
+        let winState = isWinningMove();
+        if (winState === 'win') {
+            round++;
+        } else if (winState === 'tie'){
+            round++;
+        } else {
+            // Nothing
+        }
+        swapPlayer();
+        return winState;
+    };
+
+    /**
+     * Resets the game controller. Round and CurrentPlayer
+     */
+    const reset = () => {
+        currentPlayer = 'x';
+        round = 0;
+    };
+
+    return {
+        makeMove,
+        getCurrentPlayer,
+        getRound,
+        reset
+    };
+
+})();
+
+
+/**
+ * Module Pattern That Handles All The Display Logic And DOM Manipulation
+ */
 const DisplayController = (()=> {
     const startMenu = document.querySelector('.start-menu');
     const startMenuPvpButton = document.querySelector('.start-menu > :nth-child(2)')
@@ -45,19 +275,182 @@ const DisplayController = (()=> {
     const gameMenu = document.querySelector('.game-menu');
     const gameMenuBackButton = document.querySelector('.game-menu > .nav-buttons :nth-child(1)');
     const gameMenuRestartButton = document.querySelector('.game-menu > .nav-buttons :nth-child(2)');
+    const gameMenuPlayerXContainer = document.querySelector('.game-menu > .scoreboard > div > :first-child');
     const gameMenuPlayerXName = document.querySelector('.game-menu > .scoreboard > div > :first-child > :nth-child(2)');
     const gameMenuPlayerXScore = document.querySelector('.game-menu > .scoreboard > div > :first-child > :nth-child(3)');
+    const gameMenuPlayerOContainer = document.querySelector('.game-menu > .scoreboard > div > :last-child');
     const gameMenuPlayerOName = document.querySelector('.game-menu > .scoreboard > div > :last-child > :nth-child(2)');
     const gameMenuPlayerOScore = document.querySelector('.game-menu > .scoreboard > div > :last-child > :nth-child(3)');
+    const gameMenuGameboardFields = document.querySelectorAll('[data-index]');
+    const gameMenuRound = document.querySelector('.game-menu .scoreboard > p > :first-child');
+
+    const gamePopUp = document.querySelector('.game-pop-up');
 
     let activeDifficultyButton = pveMenuEasyButton;
     let gameOption = {};
-    /** Returns the game options */
-    const getGameOption = () => {
-        return gameOption;
+
+
+
+    // =============== START Gameboard Field Listeners =================== 
+
+    /**
+     * Enables the pop up menu and displays the correct message
+     * @param {String} moveResult the result of the move made
+     * @param {String} currentPlayer the current player symbol
+     */
+    const enablePopUpMenu = (moveResult, currentPlayer) => {
+        gamePopUp.style.display = 'flex';
+        if (moveResult === 'win'){
+            if (currentPlayer === 'x'){
+                gamePopUp.firstElementChild.innerHTML = `<p><img src="./assets/symbols/symbol-x.svg"> ${gameOption.playerX.name} Wins!</p>`;
+            } else {
+                gamePopUp.firstElementChild.innerHTML = `<p><img src="./assets/symbols/symbol-o.svg"> ${gameOption.playerO.name} Wins!</p>`;
+            }
+        } else if (moveResult === 'tie'){
+            gamePopUp.firstElementChild.innerHTML = `It's a Tie!</p>`;
+        };
+    }
+
+    /**
+     * Disables the pop up menu and clears it
+     */
+    const disablePopUpMenu = () => {
+        gamePopUp.style.display = 'none';
+        gamePopUp.firstElementChild.innerHTML = '';
+    }
+    
+    /**
+     * Adds the correct player symbol to the display
+     * @param {Element} field gameboard field to make the move
+     * @param {String} currentPlayer the current player sybmol
+     */
+    const setPlayerMoveClass = (field, currentPlayer) => {
+        if (currentPlayer === 'o')
+            field.classList.add('player-o-move');
+        else{
+            field.classList.add('player-x-move');
+        };
     };
 
-    //
+    /**
+     * Swaps the Current Player on the display
+     * @param {String} currentPlayer the current player sybmol
+     */
+    const swapActivePlayer = (currentPlayer) => {
+        if (currentPlayer === 'x') {
+            gameMenuPlayerOContainer.classList.add('active-player');
+            gameMenuPlayerXContainer.classList.remove('active-player');
+        } else {
+            gameMenuPlayerOContainer.classList.remove('active-player');
+            gameMenuPlayerXContainer.classList.add('active-player');
+        };
+    };
+    
+    /**
+     * Updates the Scoreboard on the display
+     * @param {String} moveResult the result of the move made
+     * @param {String} currentPlayer the current player sybmol
+     */
+    const updateScoreboard = (moveResult, currentPlayer) => {
+        let round = GameController.getRound();
+        if (moveResult === 'win'){
+            if (currentPlayer === 'x'){
+                gameOption.playerX.updateScore(1);
+            }else{
+                gameOption.playerO.updateScore(1);
+            }
+        };
+        updateGameMenuScores();
+        gameMenuRound.textContent = round;
+    };
+
+    /**
+     * Resets the Game Display for the next round
+     */
+    const resetGameDisplay = () => {
+        // Reset the Gameboard
+        Gameboard.reset();
+        // Clear the gameboard field display
+        gameMenuGameboardFields.forEach(
+            gameMenuGameboardField => {
+                gameMenuGameboardField.classList.remove('player-x-move');
+                gameMenuGameboardField.classList.remove('player-o-move');
+            }
+        );
+
+        // Add event listeners;
+        addGameboardFieldListeners();
+    };
+
+    /**
+     * Restarts the Game Display === Restarts the Game
+     */
+    const restartGameDisplay = () => {
+        // Remove Possible Listeners
+        removeGameboardFieldListeners();
+        // Reset Game Display
+        resetGameDisplay()
+        // Reset Game Controller
+        GameController.reset();
+        // Reset Active Player
+        swapActivePlayer('o');
+        // Reset Player Scores
+        gameOption.playerX.resetScore();
+        gameOption.playerO.resetScore();
+        //Update Screen Display
+        updateGameMenuScores();
+        gameMenuRound.textContent = GameController.getRound();
+    }
+
+    /**
+     * The Main Function that the game is played
+     * @param {Event} event 
+     */
+    function playRound(event){
+        // Get the field that was clicked and remove its click event
+        event.target.removeEventListener('click', playRound);
+        movePosition = parseInt(event.target.dataset['index']);
+        
+        // Set the Player Symbol on the display
+        let currentPlayer = GameController.getCurrentPlayer();
+        setPlayerMoveClass(event.target, currentPlayer);
+        swapActivePlayer(currentPlayer);
+        
+        // Make the move
+        let moveResult = GameController.makeMove(movePosition);
+        if (!moveResult) return;
+        updateScoreboard(moveResult, currentPlayer);
+        
+        removeGameboardFieldListeners();
+
+        enablePopUpMenu(moveResult, currentPlayer);
+        
+        setTimeout(function () {
+           resetGameDisplay();
+           disablePopUpMenu();
+        }, 3000);
+        
+    };
+
+    /**
+     * Adds the event listeners for the gameboard fields
+     * @param {function} callback Function containing the game logic
+     */
+    const addGameboardFieldListeners = () => {
+        gameMenuGameboardFields.forEach(
+            gameMenuGameboardField => gameMenuGameboardField.addEventListener('click', playRound)
+        );
+    };
+
+    /**
+     * Removes the event listeners for the gameboard fields
+     */
+    const removeGameboardFieldListeners = () => {
+        gameMenuGameboardFields.forEach(
+            gameMenuGameboardField => gameMenuGameboardField.removeEventListener('click', playRound)
+        );
+    }
+    // =============== END Gameboard Field Listeners =================== 
 
 
     // =============== START Option Listeners PVP/PVE Menus =========
@@ -125,12 +518,10 @@ const DisplayController = (()=> {
     }
     // =============== END Option Listeners PVP/PVE Menus =========
 
-
+    
 
 
     // =============== START Navigation Between Menus ==============
-    // TODO: - ON NAVIGATION CLEAR PVP/PVE Settings on Display
-    // TODO: - ON NAVIGATION SET GAME MENU OPTIONS
     /**
      * Changes the menu to display on the screen by changing the display attribute.
      * @param {Element} from menu Element to navigate from
@@ -190,6 +581,11 @@ const DisplayController = (()=> {
             handleNavigation(startMenu, pveMenu)});
     };
 
+    const startGameMenuDisplay = () => {
+        updateGameMenuNames();
+        restartGameDisplay();
+    }
+
     /**
      * Adds the event listeners for the PVP Menu Navigation Buttons.
      */
@@ -202,8 +598,7 @@ const DisplayController = (()=> {
         pvpMenuStartButton.addEventListener('click', () => {
             handleNavigation(pvpMenu, gameMenu);
             gameOption = generateOptions('pvp');
-            updateGameMenuNames();
-            updateGameMenuScores();
+            startGameMenuDisplay();
         });
     };
 
@@ -219,8 +614,7 @@ const DisplayController = (()=> {
         pveMenuStartButton.addEventListener('click', () => {
             handleNavigation(pveMenu, gameMenu);
             gameOption = generateOptions('pve');
-            updateGameMenuNames();
-            updateGameMenuScores();
+            startGameMenuDisplay();
         });
         
     };
@@ -232,11 +626,12 @@ const DisplayController = (()=> {
         //game back button
         gameMenuBackButton.addEventListener('click', () => {
             handleNavigation(gameMenu, startMenu);
+            resetGameDisplay();
         });
 
         //TODO IMPLEMENT LOGIC
         gameMenuRestartButton.addEventListener('click', () => {
-
+            restartGameDisplay();
         });
 
     };
@@ -263,3 +658,13 @@ const DisplayController = (()=> {
 
 DisplayController.addNavigationListeners();
 DisplayController.addOptionListeners();
+
+
+
+
+
+
+
+
+
+

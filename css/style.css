@@ -12,6 +12,7 @@
     --blue-dark: #131D40;
     --white-main: #ffffffde;
     --gray: #444444;
+    --gray-transparent: rgba(68, 68, 68, 0.75);
     
     --dark-bg: #121212;
 
@@ -361,3 +362,36 @@ main {
     box-shadow: 0 0 0.5rem 0.25rem var(--blue-light);
 }
 
+.player-x-move{
+    background: url('../assets/symbols/symbol-x.svg') no-repeat center / 90%;   
+}
+
+.player-o-move{
+    background: url('../assets/symbols/symbol-o.svg') no-repeat center / 90%;   
+}
+
+.game-pop-up {
+    position: fixed;
+    background-color: var(--gray-transparent);
+    width: 100%;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+.game-pop-up > div {
+    font-size: 2rem;
+    font-weight: 600;
+    padding: 1rem;
+    
+}
+
+.game-pop-up > div > p {
+
+}
+
+.game-pop-up > div img {
+    width: 3rem;
+    height: auto;
+    vertical-align: middle;
+}
