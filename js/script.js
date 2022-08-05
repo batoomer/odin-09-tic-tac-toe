@@ -280,8 +280,14 @@ const GameController = (()=>{
 
 
 
+/**
+ * Module Pattern that contains the diffrent type of AI for TicTacToe
+ */
 const ComputerLogic = (() => {
 
+    /**
+     * @returns all free fields available
+     */
     const getFreeFields = () => {
         let freeFields = []
         for (let i=0; i<Gameboard.length(); i++){
@@ -291,6 +297,58 @@ const ComputerLogic = (() => {
         };
         return freeFields;
     };
+
+
+    /**
+     * The minmax algorithm in Game Theory
+     */
+    const minxmax = (depth, isMaximizing) => {
+        let moveResult = GameController.isWinningMove();
+        if (moveResult === 'win'){
+            if (isMaximizing){
+                return -1;
+            };
+            if (!isMaximizing){
+                return +1;
+            }
+        };
+        if (moveResult === 'tie'){
+            return 0;
+        }
+
+
+        if (isMaximizing) {
+            let bestScore = -Infinity;
+            let availableMoves = getFreeFields();
+            
+            while(availableMoves.length) {
+                let move = availableMoves.pop();
+                Gameboard.addMove(move, 'o');
+                let score = minxmax(depth+1, false);
+                bestScore = Math.max(score, bestScore);
+                Gameboard.deleteMove(move);
+            };
+
+            return bestScore;
+
+        } else {
+            let bestScore = +Infinity;
+            let availableMoves = getFreeFields();
+            
+            while(availableMoves.length) {
+                let move = availableMoves.pop();
+                Gameboard.addMove(move, 'x');
+                let score = minxmax(depth+1, true);
+                bestScore = Math.min(score, bestScore);
+                Gameboard.deleteMove(move);
+            };
+
+            return bestScore;
+
+        }
+    }; 
+
+
 
     /**
      * Return a random move for the computer. -EASY DIFFICULTY
@@ -352,12 +410,36 @@ const ComputerLogic = (() => {
         return index;
     };
 
+    /**
+     * Returns the best move the computer can make. Minmax algorithm
+     * @returns optimal computer move
+     */
     const getImpossibleMove = () => {
+        let bestScore = -Infinity;
+        let bestMove = 0;
+        let availableMoves = getFreeFields();
 
+        while(availableMoves.length) {
+            let move = availableMoves.pop();
+            Gameboard.addMove(move, 'o');
+            let score = minxmax(0, false);
+            if (score > bestScore){
+                bestScore = score;
+                bestMove = move;
+            };
+            Gameboard.deleteMove(move);
+        };
+
+
+        return bestMove;
     };
 
 
-
+    /**
+     * Returns the computer move based on the selected difficulty
+     * @param {String} difficulty
+     * @returns the computer move 
+     */
     const getComputerMove = (difficulty) => {
         switch (difficulty){
             case 'easy':
@@ -365,10 +447,14 @@ const ComputerLogic = (() => {
             case 'normal':
                 return getNormalMove();
             case 'impossible':
-                break;
+                return getImpossibleMove();
         };
     };
 
+    /**
+     * Makes A Computer move by clicking on the coressponding field.
+     * @param {String} difficulty 
+     */
     const makeComputerMove = (difficulty) => {
         let move = getComputerMove(difficulty);
         document.querySelector(`[data-index='${move}']`).click();
