@@ -52,6 +52,8 @@ const Gameboard = (()=> {
      * @returns boolean 
      */
     const isIndexValid = (index) => {return (0 <= index && index < 9) ? true : false};
+
+    const isFieldFree = (index) => {return (gameboard[index] === '') ? true : false};
     
     /**
      * Returns the value of the given field.
@@ -95,6 +97,7 @@ const Gameboard = (()=> {
     
     return {
         printGameboard,
+        isFieldFree,
         getMove,
         addMove,
         isFull,
@@ -110,6 +113,7 @@ const Gameboard = (()=> {
 const GameController = (()=>{
 
     let currentPlayer = 'x';
+    let currentRoundStarter = 'x';
     let round = 0;
 
 
@@ -207,6 +211,20 @@ const GameController = (()=>{
     };
 
     /**
+     * Sets the player starting the new round.
+     * Players Alternate between each round.
+     */
+    const setRoundStarter = () => {
+        if (currentRoundStarter === 'x') {
+            
+            currentRoundStarter = 'o';
+        }else {
+            currentRoundStarter = 'x'
+        }
+        currentPlayer = currentRoundStarter;
+    }
+
+    /**
      * Makes a move and checks if it has any impact on the game. If 
      * the move is a finishing/ending move increments the round. Also swaps
      * the player after the move was made.
@@ -219,12 +237,15 @@ const GameController = (()=>{
         let winState = isWinningMove();
         if (winState === 'win') {
             round++;
+            setRoundStarter();
+            currentPlayer = currentRoundStarter;
         } else if (winState === 'tie'){
             round++;
+            setRoundStarter();
         } else {
-            // Nothing
+            swapPlayer();
         }
-        swapPlayer();
+
         return winState;
     };
 
@@ -233,6 +254,7 @@ const GameController = (()=>{
      */
     const reset = () => {
         currentPlayer = 'x';
+        currentRoundStarter = 'x';
         round = 0;
     };
 
@@ -244,6 +266,43 @@ const GameController = (()=>{
     };
 
 })();
+
+
+
+const ComputerLogic = (() => {
+
+
+    const getEasyMove = () => {
+        let index = Math.floor(Math.random() * 9);
+        while (!Gameboard.isFieldFree(index)){
+            index = Math.floor(Math.random() * 9);
+        };
+        return index;
+    };
+
+    const getComputerMove = (difficulty) => {
+        switch (difficulty){
+            case 'easy':
+                return getEasyMove();
+            case 'normal':
+                break;
+            case 'impossible':
+                break;
+        };
+    };
+
+    const makeComputerMove = (difficulty) => {
+        let move = getComputerMove(difficulty);
+        document.querySelector(`[data-index='${move}']`).click();
+    }
+
+    return {
+        makeComputerMove,
+    }
+
+})();
+
+
 
 
 /**
@@ -340,7 +399,7 @@ const DisplayController = (()=> {
         if (currentPlayer === 'x') {
             gameMenuPlayerOContainer.classList.add('active-player');
             gameMenuPlayerXContainer.classList.remove('active-player');
-        } else {
+        } else if (currentPlayer ==='o'){
             gameMenuPlayerOContainer.classList.remove('active-player');
             gameMenuPlayerXContainer.classList.add('active-player');
         };
@@ -380,6 +439,12 @@ const DisplayController = (()=> {
 
         // Add event listeners;
         addGameboardFieldListeners();
+        
+        if (GameController.getCurrentPlayer() === 'x')
+            swapActivePlayer('o');
+        else {
+            swapActivePlayer('x');
+        }
     };
 
     /**
@@ -413,21 +478,32 @@ const DisplayController = (()=> {
         
         // Set the Player Symbol on the display
         let currentPlayer = GameController.getCurrentPlayer();
-        setPlayerMoveClass(event.target, currentPlayer);
-        swapActivePlayer(currentPlayer);
+
         
         // Make the move
         let moveResult = GameController.makeMove(movePosition);
-        if (!moveResult) return;
-        updateScoreboard(moveResult, currentPlayer);
-        
-        removeGameboardFieldListeners();
+        setPlayerMoveClass(event.target, currentPlayer);
+        swapActivePlayer(currentPlayer);
 
-        enablePopUpMenu(moveResult, currentPlayer);
+        if (!moveResult) {
+
+
+            if (gameOption.gameType === 'pve' && GameController.getCurrentPlayer()==='o') {
+                ComputerLogic.makeComputerMove(gameOption.difficulty);
+            };
+            return;
+        }
         
+        updateScoreboard(moveResult, currentPlayer);
+        removeGameboardFieldListeners();
+        enablePopUpMenu(moveResult, currentPlayer);
+
         setTimeout(function () {
-           resetGameDisplay();
-           disablePopUpMenu();
+            resetGameDisplay();
+            disablePopUpMenu();
+            if (gameOption.gameType === 'pve' && GameController.getCurrentPlayer()==='o') {
+                ComputerLogic.makeComputerMove(gameOption.difficulty);
+            };
         }, 3000);
         
     };
@@ -658,7 +734,6 @@ const DisplayController = (()=> {
 
 DisplayController.addNavigationListeners();
 DisplayController.addOptionListeners();
-
 
 
 
